@@ -1,5 +1,6 @@
 import sqlite3
 import json
+import os
 
 # Load User Profiles
 def load_profiles():
@@ -20,11 +21,15 @@ def view_all_databases():
 
     for profile in profiles:
         db_name = f"{profile['name'].lower().replace(' ', '_')}_vacancies.db"
-        print(f"\nViewing records for {profile['name']} in database: {db_name}")
+        db_path = os.path.join('databases', db_name)  # Update to include subfolder
+
+        print(f"\n{'='*80}")
+        print(f"Viewing records for {profile['name']} in database: {db_name}")
+        print(f"{'='*80}\n")
         
         try:
             # Connect to the SQLite database for this user
-            conn = sqlite3.connect(db_name)
+            conn = sqlite3.connect(db_path)
 
             # Create a cursor object
             cursor = conn.cursor()
@@ -36,10 +41,12 @@ def view_all_databases():
             # Close the connection
             conn.close()
 
-            # Display the results
+            # Display the results with column headers and formatted output
             if rows:
+                print(f"{'University':<20} | {'Title':<30} | {'Link':<50} | {'Date Posted':<15} | {'Scraped Date':<15}")
+                print(f"{'-'*140}")
                 for row in rows:
-                    print(f"University: {row[2]}, Title: {row[1]}, Link: {row[3]}, Date Posted: {row[4]}, Scraped Date: {row[5]}, Description: {row[6]}")
+                    print(f"{row[2]:<20} | {row[1]:<30} | {row[3]:<50} | {row[4]:<15} | {row[5]:<15}")
             else:
                 print("No records found.")
 
@@ -47,7 +54,7 @@ def view_all_databases():
             print(f"Error accessing database {db_name}: {e}")
 
     # Pause before closing
-    input("Press Enter to close...")
+    input("\nPress Enter to close...")
 
 # Run the function
 if __name__ == "__main__":

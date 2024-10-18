@@ -1,10 +1,37 @@
 import json
 import sqlite3
+import os
 from scrapers.lund_university import scrape_lund_university
 from scrapers.eth_zurich import scrape_eth_zurich
 from scrapers.kth import scrape_kth
 from scrapers.uppsala_university import scrape_uppsala
 from scrapers.dtu import scrape_dtu
+
+# Ensure the /databases subfolder exists
+def ensure_db_folder_exists():
+    if not os.path.exists('databases'):
+        os.makedirs('databases')
+
+# Initialize the central database in the /databases folder
+def init_db():
+    ensure_db_folder_exists()
+    db_path = os.path.join('databases', 'scraped_data.db')
+    conn = sqlite3.connect(db_path)
+    cursor = conn.cursor()
+    
+    # Create table if it doesn't exist
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_name TEXT,
+        university_name TEXT,
+        data TEXT,
+        date_scraped TEXT
+    )
+    ''')
+    
+    conn.commit()
+    conn.close()
 
 # Load University URLs from JSON
 def load_universities():
@@ -27,8 +54,9 @@ SCRAPER_FUNCTIONS = {
     "Technical University of Denmark (DTU)": scrape_dtu,
 }
 
-# Execute the scraper for all profiles and universities
 def main():
+    init_db()  # Initialize the database
+    
     profiles = load_profiles()
     universities = load_universities()
 
